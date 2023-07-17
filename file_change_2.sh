@@ -18,7 +18,13 @@ check_file_modifications() {
     local commit_details=$(curl -s -H "Authorization: token $TOKEN" "$API_URL/$commit_sha")
 
     # Extract the modified files from the commit details
-    local modified_files=$(echo "$commit_details" | jq -r '.[ ].files[] | .filename')
+    local modified_files
+
+    if [[ $(echo "$commit_details" | jq '.[0].files') == "null" ]]; then
+        modified_files=$(echo "$commit_details" | jq -r '.[].commit.modified[]')
+    else
+        modified_files=$(echo "$commit_details" | jq -r '.[].files[].filename')
+    fi
 
     # Print the modified files
     for file in $modified_files; do
@@ -32,7 +38,7 @@ initial_commit_sha=""
 # Continuously monitor for file modifications
 while true; do
     # Get the latest commit SHA using the GitHub API
-    latest_commit_sha=$(curl -s -H "Authorization: token $TOKEN" "$API_URL" | jq -r '.[ ].sha')
+    latest_commit_sha=$(curl -s -H "Authorization: token $TOKEN" "$API_URL" | jq -r '.[].sha')
 
     if [[ -z $initial_commit_sha ]]; then
         # Set the initial commit SHA
@@ -45,7 +51,5 @@ while true; do
         initial_commit_sha=$latest_commit_sha
     fi
 
-    sleep 10  # Adjust the sleep duration as per your needs
+    sleep 60  # Adjust the sleep duration as per your needs
 done
-
-	
