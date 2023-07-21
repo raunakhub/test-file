@@ -2,7 +2,7 @@
 
 # Set your GitHub username and repository name
 username="raunakhub"
-repository="file-change-test"
+repository="test-file"
 
 # Retrieve the latest commit details using the GitHub API
 commit=$(curl -s "https://api.github.com/repos/$username/$repository/commits" | grep -m 1 '"sha"' | cut -d '"' -f 4)
